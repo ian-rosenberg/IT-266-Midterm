@@ -100,6 +100,8 @@ const idEventDef EV_PlayEffect( "playEffect", "ssd" );
 const idEventDef EV_StopEffect( "stopEffect", "s" );
 const idEventDef EV_StopAllEffects( "stopAllEffects" );
 const idEventDef EV_GetHealth ( "getHealth", NULL, 'f' );
+const idEventDef EV_GetMana("getMana", NULL, 'f');
+const idEventDef EV_GetStamina("getStamina", NULL, 'f');
 // bdube: surface related events
 const idEventDef EV_HideSurface( "hideSurface", "s" );
 const idEventDef EV_ShowSurface( "showSurface", "s" );
@@ -121,6 +123,8 @@ const idEventDef EV_AppendTarget( "appendTarget", "E", 'f' );
 const idEventDef EV_RemoveTarget( "removeTarget", "e" );
 // mekberg:
 const idEventDef EV_SetHealth( "setHealth", "f" );
+const idEventDef EV_SetMana("setMana", NULL, 'f');
+const idEventDef EV_SetStamina("setStamina", NULL, 'f');
 // RAVEN END
 
 ABSTRACT_DECLARATION( idClass, idEntity )
@@ -199,6 +203,8 @@ ABSTRACT_DECLARATION( idClass, idEntity )
 	EVENT( EV_StopEffect,			idEntity::Event_StopEffect )
 	EVENT( EV_StopAllEffects,		idEntity::Event_StopAllEffects )
 	EVENT( EV_GetHealth,			idEntity::Event_GetHealth )
+	EVENT( EV_GetMana,				idEntity::Event_GetMana)
+	EVENT( EV_GetStamina,			idEntity::Event_GetStamina)
 // bdube: mesh events
 	EVENT( EV_HideSurface,			idEntity::Event_HideSurface )
 	EVENT( EV_ShowSurface,			idEntity::Event_ShowSurface )
@@ -220,6 +226,8 @@ ABSTRACT_DECLARATION( idClass, idEntity )
 	EVENT( EV_RemoveTarget,			idEntity::Event_RemoveTarget )
 // mekberg: added
 	EVENT( EV_SetHealth,			idEntity::Event_SetHealth )
+	EVENT(EV_SetMana,				idEntity::Event_SetMana)
+	EVENT(EV_SetStamina,			idEntity::Event_SetStamina)
 // RAVEN END
 END_CLASS
 
@@ -491,6 +499,8 @@ idEntity::idEntity() {
 	renderView		= NULL;
 	cameraTarget	= NULL;
 	health			= 0;
+	mana			= 0;
+	stamina			= 0;
 
 	physics			= NULL;
 	bindMaster		= NULL;
@@ -642,6 +652,8 @@ void idEntity::Spawn( void ) {
 	}
 
 	health = spawnArgs.GetInt( "health" );
+	//mana = spawnArgs.GetInt("mana");
+	//stamina = spawnArgs.GetInt("stamina");
 
 	InitDefaultPhysics( origin, axis );
 
@@ -766,6 +778,8 @@ void idEntity::Save( idSaveGame *savefile ) const {
 	}
 
 	savefile->WriteInt( health );
+	savefile->WriteInt(mana);
+	savefile->WriteInt(stamina);
 
 	savefile->WriteInt( clientEntities.Num() );
 	for( cent = clientEntities.Next(); cent; cent = cent->bindNode.Next() ) {
@@ -861,6 +875,8 @@ void idEntity::Restore( idRestoreGame *savefile ) {
 	}
 
 	savefile->ReadInt( health );
+	savefile->ReadInt(mana);
+	savefile->ReadInt(stamina);
 
 	savefile->ReadInt( num );
 	for( i = 0; i < num; i++ ) {
@@ -4459,6 +4475,14 @@ void idEntity::Event_GetHealth ( void ) {
 	idThread::ReturnFloat( health );
 }
 
+void idEntity::Event_GetMana(void) {
+	idThread::ReturnFloat(mana);
+}
+
+void idEntity::Event_GetStamina(void) {
+	idThread::ReturnFloat(stamina);
+}
+
 // jscott:
 /*
 ================
@@ -4890,6 +4914,14 @@ idEntity::Event_SetHealth
 */
 void idEntity::Event_SetHealth( float newHealth ) {
 	health =  newHealth;
+}
+
+void idEntity::Event_SetMana(float newMana) {
+	mana = newMana;
+}
+
+void idEntity::Event_SetStamina(float newStamina) {
+	stamina = newStamina;
 }
 // RAVEN END
 

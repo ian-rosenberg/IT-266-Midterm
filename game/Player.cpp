@@ -62,6 +62,8 @@ const float	PLAYER_ITEM_DROP_SPEED	= 100.0f;
 // how many units to raise spectator above default view height so it's in the head of someone
 const int SPECTATE_RAISE = 25;
 
+const int	MANA_PULSE			= 1000;
+const int	STAMINA_PULSE		= 1000;
 const int	HEALTH_PULSE		= 1000;			// Regen rate and heal leak rate (for health > 100)
 const int	ARMOR_PULSE			= 1000;			// armor ticking down due to being higher than maxarmor
 const int	AMMO_REGEN_PULSE	= 1000;			// ammo regen in Arena CTF
@@ -1844,7 +1846,7 @@ void idPlayer::Spawn( void ) {
 		objectiveSystem = NULL;
 
 		if ( spawnArgs.GetString( "hud", "", temp ) ) {
-			hud = uiManager->FindGui( temp, true, false, true );
+			hud = uiManager->FindGui( "pak021/guis/hud.gui", true, false, true );
 		} else {
 			gameLocal.Warning( "idPlayer::Spawn() - No hud for player." );
 		}

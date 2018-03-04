@@ -135,6 +135,8 @@ public:
 	idList< idEntityPtr<idEntity> >	targets;		// when this entity is activated these entities entity are activated
 
 	int						health;					// FIXME: do all objects really need health?
+	int						mana;
+	int						stamina;
 
 // RAVEN BEGIN
 // ddynerman: optional pre-prediction
@@ -651,6 +653,8 @@ protected:
 	void					Event_StopEffect				( const char* effectName );
 	void					Event_StopAllEffects			( void );
 	void					Event_GetHealth					( void );
+	void					Event_GetMana					(void);
+	void					Event_GetStamina				(void);
 // bdube: mesh events
 	void					Event_ShowSurface				( const char* surface );
 	void					Event_HideSurface				( const char* surface );
@@ -674,6 +678,8 @@ protected:
 	void					Event_RemoveTarget				( idEntity *removeMe );
 // mekberg: added
 	void					Event_SetHealth					( float newHealth );
+	void					Event_SetMana					(float newMana);
+	void					Event_SetStamina				(float newStamina);
 // RAVEN END
 };
 
