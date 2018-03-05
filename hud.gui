@@ -5,6 +5,44 @@ windowDef Desktop
 	nocursor	1
 	menugui	0
 	
+//-----------------------
+//Health, Mana, and Stamina bars
+//-----------------------
+	windowDef healthBar
+	{
+		rect 10,100,("gui::player_health"),20
+		visible 1
+		backcolor 1,0,0,1
+		text "Health"
+		textscale 0.3
+		nocursor 1
+		shear 0,0.25
+	}
+	
+	windowDef manaBar
+	{
+		rect 10,125,("gui::player_mana"),20
+		visible 1
+		backcolor 0,0,1,1
+		text "Mana"
+		textscale 0.3
+		nocursor 1
+		shear 0,0.25
+	}
+	
+	windowDef staminaBar
+	{
+		rect 10,150,("gui::player_stamina"),20
+		visible 1
+		backcolor 0,1,0,1
+		text "Stamina"
+		textscale 0.3
+		nocursor 1
+		shear 0,0.25
+	}
+
+	
+	
 //-----------------------		
 // floats and defines
 //-----------------------		
@@ -37,6 +75,7 @@ windowDef Desktop
 	
 	onInit {
 		namedEvent "updateHealth";
+		namedEvent "updateHP";
 		namedEvent "updateMana";
 		namedEvent "updateArmor";
 		namedEvent "updateAmmo";		
@@ -45,6 +84,13 @@ windowDef Desktop
 		namedEvent "hideBrackets";
 		namedEvent "weaponChange";
 		namedEvent "radioChatterDown";
+	}
+	
+	onNamedEvent updateMana{
+		if("gui::mp" == 0)
+		{
+			set "manaBar::rect" "10,125,gui::player_mana + 100,20"
+		}
 	}
 	
 	onNamedEvent hideHud {
@@ -173,20 +219,6 @@ windowDef Desktop
 		if ( "gui::player_healthdelta" < 0 )
 		{
 			resettime "health_amount" "0" ;
-		}
-	}
-	
-	onNamedEvent updateMana {
-		if ( "gui::mp" == 0 )
-		{
-				set "mana_valbar::matcolor" "0,0,3,1" ;
-				set "mana_val::matcolor" "0,0.3,1,0.5" ;
-				set "manaBar::rect" "0,112.5,,10
-		}
-	
-		if ( "gui::player_manadelta" < 0 )
-		{
-			resettime "mana_amount" "0" ;
 		}
 	}
 	
@@ -730,7 +762,7 @@ windowDef Desktop
 		}
 		windowDef health_valbar
 		{
-			rect	0,0,125,59
+			rect	190,420,125,59
 			visible	1
 			background	"gfx/guis/hud/valbar"
 			matcolor	0.701,0.815,0.431,0.2
@@ -738,7 +770,7 @@ windowDef Desktop
 		}
 		windowDef health_ekg
 		{
-			rect	0,0,125,59
+			rect	190,420,125,59
 			visible	1
 			background	"gfx/guis/hud/ekg"
 			matcolor	0.0862,0.105,0.0549,1
@@ -746,12 +778,12 @@ windowDef Desktop
 		}
 		windowDef p_health_val
 		{
-			rect	0 - ( "gui::player_healthpct" * 115 ),0,115,59
+			rect	310 - ( "gui::player_healthpct" * 115 ),420,115,59
 			visible	1
 			shear	0,-.22
 			windowDef health_val
 			{
-				rect	0 + ( "gui::player_healthpct" * 115 ),0,125,59
+				rect	-120 + ( "gui::player_healthpct" * 115 ),0,125,59
 				visible	1
 				background	"gfx/guis/hud/valbar"
 				matcolor	0.701,0.815,0.431,0.35
@@ -760,12 +792,12 @@ windowDef Desktop
 		}
 		windowDef d_health_amount
 		{
-			rect	0,0,58,31
+			rect	254,427,58,31
 			visible	0
 		}		
 		windowDef health_amount
 		{
-			rect	0,0,52,26
+			rect	256,429,52,26
 			visible	1
 			forecolor	0.866,0.921,0.764,1
 			text	"gui::player_health"
@@ -801,87 +833,6 @@ windowDef Desktop
 		}
 	}
 	
-//-----------------------		
-// mana
-//-----------------------		
-	
-	windowDef p_mana
-	{
-		rect	0,0,640,480
-		visible	("gui::mp" == 0 )
-		windowDef mana_backbar
-		{
-			rect	0,0,125,59
-			visible	1
-			background	"gfx/guis/hud/backbar"
-			matcolor	0,0,0,0.5
-			shear	0,-.22
-		}
-		windowDef mana_valbar
-		{
-			rect	0,0,125,59
-			visible	1
-			background	"gfx/guis/hud/manaval"
-			matcolor	0.701,0.815,0.431,0.2
-			shear	0,-.22
-		}
-		windowDef mana_ekg
-		{
-			rect	0,0,125,59
-			visible	1
-			background	"gfx/guis/hud/ekg"
-			matcolor	0.0862,0.105,0.0549,1
-			shear	0,-.22
-		}
-		windowDef p_mana_val
-		{
-			rect	0 - ( "gui::player_manapct" * 115 ),0,115,59
-			visible	1
-			shear	0,-.22
-			windowDef mana_val
-			{
-				rect	0 + ( "gui::player_manapct" * 115 ),0,125,59
-				visible	1
-				background	"gfx/guis/hud/valbar"
-				matcolor	0.701,0.815,0.431,0.35
-				shear	0,-.22
-			}
-		}
-		windowDef d_mana_amount
-		{
-			rect	0,0,58,31
-			visible	0
-		}		
-		windowDef mana_amount
-		{
-			rect	0,0,52,26
-			visible	1
-			forecolor	0.866,0.921,0.764,1
-			text	"gui::player_mana"
-			textscale	0.5
-			font	"fonts/chain"
-			shear	0,-.22
-			textalign	2
-			notime	1
-			
-			onTime 0
-			{
-				transition "forecolor" "$desktop::white" "$desktop::typecolor" "250" ;
-				transition "rect" "$d_mana_amount::rect" "$mana_amount::rect" "250" ;
-				transition "textscale" "0.6" "0.5" "250" ;
-				
-				transition "icon_mana::matcolor" "$desktop::white" "$desktop::manaicon" "250" ;
-			}
-		}
-		windowDef mana_backbar_add
-		{
-			rect	190,420,125,59
-			visible	0
-			background	"gfx/guis/hud/backbar_add"
-			matcolor	1*guitable_10_5[time*0.002],0,0,1
-			shear	0,-.22
-		}
-	}
 //-----------------------		
 // armor
 //-----------------------		
@@ -2599,39 +2550,5 @@ windowDef Desktop
 	}
 
 //-------------------------
-
-	windowDef healthBar
-	{
-		rect 0,100,100,10
-		visible 1
-		backcolor 1,0,0,1
-		text "Health"
-		textscale 0.3
-		nocursor 1
-		shear 0,0.1
-	}
-	
-	windowDef manaBar
-	{
-		rect 0,112.5,100,10
-		visible 1
-		backcolor 0,0,1,1
-		text "Mana"
-		textscale 0.3
-		nocursor 1
-		shear 0,0.1
-		visible 1
-	}
-	
-	windowDef staminaBar
-	{
-		rect 0,125,100,10
-		visible 1
-		backcolor 0,1,0,1
-		text "Stamina"
-		textscale 0.3
-		nocursor 1
-		shear 0,0.01
-	}
 
 }

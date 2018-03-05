@@ -199,6 +199,8 @@ idInventory::Clear
 */
 void idInventory::Clear( void ) {
 	maxHealth			= 0;
+	maxMana				= 0;
+	maxStamina			= 0;
 	weapons				= 0;
 	carryOverWeapons	= 0;
 	powerups			= 0;
@@ -399,6 +401,8 @@ void idInventory::Save( idSaveGame *savefile ) const {
 	int i;
 
 	savefile->WriteInt( maxHealth );
+	savefile->WriteInt(maxMana);
+	savefile->WriteInt(maxStamina);
 	savefile->WriteInt( weapons );
 	savefile->WriteInt( powerups );
 	savefile->WriteInt( armor );
@@ -479,6 +483,8 @@ void idInventory::Restore( idRestoreGame *savefile ) {
 	int i, num;
 
 	savefile->ReadInt( maxHealth );
+	savefile->ReadInt(maxMana);
+	savefile->ReadInt(maxStamina);
 	savefile->ReadInt( weapons );
 	savefile->ReadInt( powerups );
 	savefile->ReadInt( armor );
@@ -1807,6 +1813,10 @@ Prepare any resources used by the player.
 void idPlayer::Spawn( void ) {
 	idStr		temp;
 	idBounds	bounds;
+
+	health = inventory.maxHealth;
+	mana = inventory.maxMana;
+	stamina = inventory.maxStamina;
 
 	if ( entityNumber >= MAX_CLIENTS ) {
 		gameLocal.Error( "entityNum > MAX_CLIENTS for player.  Player may only be spawned with a client." );
@@ -3397,7 +3407,15 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 		_hud->SetStateInt	( "player_health", health < -100 ? -100 : health );
 		_hud->SetStateFloat	( "player_healthpct", idMath::ClampFloat ( 0.0f, 1.0f, (float)health / (float)inventory.maxHealth ) );
 		_hud->HandleNamedEvent ( "updateHealth" );
+		_hud->HandleNamedEvent("updateHP");
 	}
+
+	temp = _hud->State().GetInt("player_mana", "-1");
+	if (temp != mana){
+		_hud->SetStateInt("player_mana", mana);
+		_hud->HandleNamedEvent("updateMana");
+	}
+
 		
 	temp = _hud->State().GetInt ( "player_armor", "-1" );
 	if ( temp != inventory.armor ) {
@@ -7209,6 +7227,8 @@ void idPlayer::UpdateFocus( void ) {
 
 				ui->SetStateString( "player_health", va("%i", health ) );
 				ui->SetStateString( "player_armor", va( "%i%%", inventory.armor ) );
+				ui->SetStateString("player_mana", va("%i%%", mana));
+				ui->SetStateString("player_stamina", va("%i%%", stamina));
 
 				kv = ent->spawnArgs.MatchPrefix( "gui_", NULL );
 				while ( kv ) {
@@ -11182,6 +11202,7 @@ idPlayer::Event_SetHealth
 void idPlayer::Event_SetHealth( float newHealth ) {
 	health = idMath::ClampInt( 1 , inventory.maxHealth, newHealth );
 }
+
 /*
 =============
 idPlayer::Event_SetArmor

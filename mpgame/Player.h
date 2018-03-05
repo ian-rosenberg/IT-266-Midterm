@@ -1092,6 +1092,8 @@ private:
 
 	// mekberg:	added sethealth
 	void					Event_SetHealth					( float newHealth );
+	void					Event_SetMana					(float newMana);
+	void					Event_SetStamina				(float newStamina);
 	void					Event_SetArmor					( float newArmor );
 
 	void					Event_SetExtraProjPassEntity( idEntity* _extraProjPassEntity );
