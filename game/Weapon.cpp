@@ -2449,10 +2449,11 @@ rvWeapon::UseAmmo
 */
 void rvWeapon::UseAmmo ( int amount ) {
 	owner->inventory.UseAmmo( ammoType, amount * ammoRequired );
-	if ( clipSize && ammoRequired ) {
-		ammoClip -= ( amount * ammoRequired );
-		if ( ammoClip < 0 ) {
-			ammoClip = 0;
+	if ( ammoRequired <= owner->mana) {
+		//owner->stamina -= ( amount * ammoRequired );
+
+		if (owner->mana < 0) {
+			owner->mana  = 0;
 		}
 	}
 }

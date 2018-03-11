@@ -194,9 +194,10 @@ const int	ASYNC_PLAYER_TOURNEY_STATUS_BITS = idMath::BitsForInteger( PTS_NUM_STA
 
 class idInventory {
 public:
+	idPlayer*				owner;
+	
 	int						maxHealth;
 	int						maxMana;
-	int						maxStamina;
 	int						weapons;
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus
@@ -229,10 +230,11 @@ public:
 							idInventory() { Clear(); }
 							~idInventory() { Clear(); }
 
+	void					SetOwner(idPlayer* parent);
+
 	// save games
 	void					Save( idSaveGame *savefile ) const;					// archives object for save game file
 	void					Restore( idRestoreGame *savefile );					// unarchives object from save game file
-
 	void					Clear( void );
 	void					GivePowerUp( idPlayer* player, int powerup, int msec );
 	void					ClearPowerUps( void );
@@ -354,6 +356,7 @@ public:
 	int						deathClearContentsTime;
  	bool					doingDeathSkin;
 	int						nextHealthPulse;	// time when health will tick down
+	int						nextManaPulse;
 	int						nextAmmoRegenPulse[ MAX_AMMO ];	// time when ammo will regenerate
 	int						nextArmorPulse;		// time when armor will tick down
 	bool					hiddenWeapon;		// if the weapon is hidden ( in noWeapons maps )
@@ -435,6 +438,10 @@ public:
 
 	void					Spawn( void );
 	void					Think( void );
+
+
+	void					AddHealth();
+	void					AddMana();
 
 	// save games
 	void					Save( idSaveGame *savefile ) const;					// archives object for save game file
@@ -766,7 +773,7 @@ public:
 	void					SetShowHud( bool showHud );
 	bool					GetShowHud( void );
 
-
+	
 	// mekberg: wrap saveMessages
 	void					SaveMessage( void );
 
@@ -1100,7 +1107,8 @@ private:
 
 	// mekberg:	added sethealth
 	void					Event_SetHealth					( float newHealth );
-	void					Event_SetArmor					( float newArmor );
+	void					Event_SetMana					(float newMana);
+	void					Event_SetArmor					(float newArmor);
 
 	void					Event_SetExtraProjPassEntity( idEntity* _extraProjPassEntity );
 	void					Event_DamageEffect			( const char *damageDefName, idEntity* _damageFromEnt  );

@@ -79,10 +79,11 @@ void rvWeaponBlaster::Flashlight ( bool on ) {
 	
 	if ( on ) {
 		worldModel->ShowSurface ( "models/weapons/blaster/flare" );
-		viewModel->ShowSurface ( "models/weapons/blaster/flare" );
-	} else {
-		worldModel->HideSurface ( "models/weapons/blaster/flare" );
-		viewModel->HideSurface ( "models/weapons/blaster/flare" );
+		//viewModel->ShowSurface ( "models/weapons/blaster/flare" );
+	}
+	else {
+		worldModel->HideSurface("models/weapons/blaster/flare");
+		//viewModel->HideSurface("models/weapons/blaster/flare");
 	}
 }
 
@@ -108,7 +109,6 @@ bool rvWeaponBlaster::UpdateAttack ( void ) {
 		if ( fireHeldTime == 0 ) {		
 			nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
 			fireHeldTime   = gameLocal.time;
-			viewModel->SetShaderParm ( BLASTER_SPARM_CHARGEGLOW, chargeGlow[0] );
 		}
 	}		
 
@@ -146,7 +146,6 @@ rvWeaponBlaster::Spawn
 ================
 */
 void rvWeaponBlaster::Spawn ( void ) {
-	viewModel->SetShaderParm ( BLASTER_SPARM_CHARGEGLOW, 0 );
 	SetState ( "Raise", 0 );
 	
 	chargeGlow   = spawnArgs.GetVec2 ( "chargeGlow" );
@@ -336,7 +335,7 @@ stateResult_t rvWeaponBlaster::State_Charge ( const stateParms_t& parms ) {
 	};	
 	switch ( parms.stage ) {
 		case CHARGE_INIT:
-			viewModel->SetShaderParm ( BLASTER_SPARM_CHARGEGLOW, chargeGlow[0] );
+
 			StartSound ( "snd_charge", SND_CHANNEL_ITEM, 0, false, NULL );
 			PlayCycle( ANIMCHANNEL_ALL, "charging", parms.blendFrames );
 			return SRESULT_STAGE ( CHARGE_WAIT );
@@ -347,7 +346,7 @@ stateResult_t rvWeaponBlaster::State_Charge ( const stateParms_t& parms ) {
 				f = (float)(gameLocal.time - fireHeldTime) / (float)chargeTime;
 				f = chargeGlow[0] + f * (chargeGlow[1] - chargeGlow[0]);
 				f = idMath::ClampFloat ( chargeGlow[0], chargeGlow[1], f );
-				viewModel->SetShaderParm ( BLASTER_SPARM_CHARGEGLOW, f );
+
 				
 				if ( !wsfl.attack ) {
 					SetState ( "Fire", 0 );
@@ -374,7 +373,6 @@ stateResult_t rvWeaponBlaster::State_Charged ( const stateParms_t& parms ) {
 	};	
 	switch ( parms.stage ) {
 		case CHARGED_INIT:		
-			viewModel->SetShaderParm ( BLASTER_SPARM_CHARGEGLOW, 1.0f  );
 
 			StopSound ( SND_CHANNEL_ITEM, false );
 			StartSound ( "snd_charge_loop", SND_CHANNEL_ITEM, 0, false, NULL );
@@ -406,7 +404,6 @@ stateResult_t rvWeaponBlaster::State_Fire ( const stateParms_t& parms ) {
 		case FIRE_INIT:	
 
 			StopSound ( SND_CHANNEL_ITEM, false );
-			viewModel->SetShaderParm ( BLASTER_SPARM_CHARGEGLOW, 0 );
 			//don't fire if we're targeting a gui.
 			idPlayer* player;
 			player = gameLocal.GetLocalPlayer();

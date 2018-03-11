@@ -62,8 +62,7 @@ const float	PLAYER_ITEM_DROP_SPEED	= 100.0f;
 // how many units to raise spectator above default view height so it's in the head of someone
 const int SPECTATE_RAISE = 25;
 
-const int	MANA_PULSE			= 1000;
-const int	STAMINA_PULSE		= 1000;
+const int	MANA_PULSE			= 2000;
 const int	HEALTH_PULSE		= 1000;			// Regen rate and heal leak rate (for health > 100)
 const int	ARMOR_PULSE			= 1000;			// armor ticking down due to being higher than maxarmor
 const int	AMMO_REGEN_PULSE	= 1000;			// ammo regen in Arena CTF
@@ -192,6 +191,10 @@ const idVec4 marineHitscanTint( 0.69f, 1.0f, 0.4f, 1.0f );
 const idVec4 stroggHitscanTint( 1.0f, 0.5f, 0.0f, 1.0f );
 const idVec4 defaultHitscanTint( 0.4f, 1.0f, 0.4f, 1.0f );
 
+void idInventory::SetOwner(idPlayer* parent){
+	owner = parent;
+}
+
 /*
 ==============
 idInventory::Clear
@@ -200,13 +203,13 @@ idInventory::Clear
 void idInventory::Clear( void ) {
 	maxHealth			= 0;
 	maxMana				= 0;
-	maxStamina			= 0;
 	weapons				= 0;
 	carryOverWeapons	= 0;
 	powerups			= 0;
 	armor				= 0;
 	maxarmor			= 0;
 	secretAreasDiscovered = 0;
+	
 
 	memset( ammo, 0, sizeof( ammo ) );
 
@@ -235,6 +238,21 @@ void idInventory::Clear( void ) {
 	memset( ammoIndices, -1, sizeof( int ) * MAX_WEAPONS );
 	memset( startingAmmo, -1, sizeof( int ) * MAX_WEAPONS );
 	memset( ammoRegenTime, -1, sizeof( int ) * MAX_WEAPONS );
+}
+
+
+void idPlayer::AddHealth()
+{
+	inventory.maxHealth += 5;
+	health += 5;
+
+	return;
+}
+
+void idPlayer::AddMana()
+{
+	inventory.maxMana += 10;
+	mana += 10;
 }
 
 /*
@@ -338,6 +356,7 @@ void idInventory::RestoreInventory( idPlayer *owner, const idDict &dict ) {
 
 	// health/armor
 	maxHealth		= dict.GetInt( "maxhealth", "100" );
+	maxMana			= 100;
 	armor			= dict.GetInt( "armor", "50" );
 	maxarmor		= dict.GetInt( "maxarmor", "100" );
 
@@ -402,7 +421,6 @@ void idInventory::Save( idSaveGame *savefile ) const {
 
 	savefile->WriteInt( maxHealth );
 	savefile->WriteInt(maxMana);
-	savefile->WriteInt(maxStamina);
 	savefile->WriteInt( weapons );
 	savefile->WriteInt( powerups );
 	savefile->WriteInt( armor );
@@ -484,7 +502,6 @@ void idInventory::Restore( idRestoreGame *savefile ) {
 
 	savefile->ReadInt( maxHealth );
 	savefile->ReadInt(maxMana);
-	savefile->ReadInt(maxStamina);
 	savefile->ReadInt( weapons );
 	savefile->ReadInt( powerups );
 	savefile->ReadInt( armor );
@@ -1042,7 +1059,7 @@ int idInventory::HasAmmo( int index, int amount ) {
 	}
 
 	// return how many shots we can fire
-	return ammo[ index ] / amount;
+	return owner->mana / amount;
 }
 
 /*
@@ -1068,8 +1085,8 @@ bool idInventory::UseAmmo( int index, int amount ) {
 	}
 
 	// take an ammo away if not infinite
-	if ( ammo[ index ] >= 0 ) {
-		ammo[ index ] -= amount;
+	if (owner->mana >= 0 ) {
+		owner->mana -= amount;
  		ammoPredictTime = gameLocal.time; // mp client: we predict this. mark time so we're not confused by snapshots
 	}
 
@@ -1126,6 +1143,7 @@ idPlayer::idPlayer() {
 	lastDmgTime				= 0;
 	deathClearContentsTime	= 0;
 	nextHealthPulse			= 0;
+	nextManaPulse			= 0;
 
 	scoreBoardOpen			= false;
 	forceScoreBoard			= false;
@@ -1502,6 +1520,11 @@ idPlayer::Init
 */
 void idPlayer::Init( void ) {
 	const char			*value;
+
+	inventory.SetOwner(this);
+
+	health = inventory.maxHealth;
+	mana = inventory.maxMana;
 	
 	noclip					= false;
 	godmode					= false;
@@ -1816,7 +1839,7 @@ void idPlayer::Spawn( void ) {
 
 	health = inventory.maxHealth;
 	mana = inventory.maxMana;
-	stamina = inventory.maxStamina;
+
 
 	if ( entityNumber >= MAX_CLIENTS ) {
 		gameLocal.Error( "entityNum > MAX_CLIENTS for player.  Player may only be spawned with a client." );
@@ -1856,7 +1879,7 @@ void idPlayer::Spawn( void ) {
 		objectiveSystem = NULL;
 
 		if ( spawnArgs.GetString( "hud", "", temp ) ) {
-			hud = uiManager->FindGui( "pak021/guis/hud.gui", true, false, true );
+			hud = uiManager->FindGui( "hud.gui", true, false, true );
 		} else {
 			gameLocal.Warning( "idPlayer::Spawn() - No hud for player." );
 		}
@@ -2822,6 +2845,10 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 	if ( health > inventory.maxHealth ) {
 		nextHealthPulse = gameLocal.time + HEALTH_PULSE;
 	}
+
+	if (mana < inventory.maxMana){
+		nextManaPulse = gameLocal.time + MANA_PULSE;
+	}
 	
 	if ( inventory.armor > inventory.maxarmor ) {
 		nextArmorPulse = gameLocal.time + ARMOR_PULSE;
@@ -2987,6 +3014,7 @@ void idPlayer::SavePersistantInfo( void ) {
 	playerInfo.Clear();
 	inventory.GetPersistantData( playerInfo );
 	playerInfo.SetInt( "health", health );
+	playerInfo.SetInt("mana", mana);
 	playerInfo.SetInt( "current_weapon", currentWeapon );
 }
 
@@ -3006,6 +3034,7 @@ void idPlayer::RestorePersistantInfo( void ) {
 
 	inventory.RestoreInventory( this, spawnArgs );
  	health = spawnArgs.GetInt( "health", "100" );
+	mana = spawnArgs.GetInt("mana", "100");
  	if ( !gameLocal.isClient ) {
  		idealWeapon = spawnArgs.GetInt( "current_weapon", "0" );
  	}
@@ -3407,13 +3436,14 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 		_hud->SetStateInt	( "player_health", health < -100 ? -100 : health );
 		_hud->SetStateFloat	( "player_healthpct", idMath::ClampFloat ( 0.0f, 1.0f, (float)health / (float)inventory.maxHealth ) );
 		_hud->HandleNamedEvent ( "updateHealth" );
-		_hud->HandleNamedEvent("updateHP");
 	}
 
+	gameLocal.Printf('\n' + "Mana amt: " + mana + '\n');
+	
+
 	temp = _hud->State().GetInt("player_mana", "-1");
-	if (temp != mana){
+	if (temp != mana || !temp){
 		_hud->SetStateInt("player_mana", mana);
-		_hud->HandleNamedEvent("updateMana");
 	}
 
 		
@@ -4122,6 +4152,7 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
  			}
 		}
 		nextHealthPulse = gameLocal.time + HEALTH_PULSE;
+		nextManaPulse = gameLocal.time + MANA_PULSE;
 	} else if ( !idStr::Icmp( statname, "armor" ) ) {
 		if ( inventory.armor >= boundaryArmor ) {
 			return false;
@@ -4898,6 +4929,15 @@ void idPlayer::UpdatePowerUps( void ) {
 			if ( (inventory.powerupEndTime[wearoff] - gameLocal.time) / POWERUP_BLINK_TIME != ( inventory.powerupEndTime[wearoff] - gameLocal.previousTime ) / POWERUP_BLINK_TIME ) {
 				StartSound ( "snd_powerup_wearoff", SND_CHANNEL_POWERUP, 0, false, NULL );
 			}
+		}
+	}
+
+	if (gameLocal.time > nextManaPulse){
+		if (mana < inventory.maxMana){
+			mana += (inventory.maxMana / 10);
+		}
+		else{
+			mana = inventory.maxMana;
 		}
 	}
 
@@ -6314,6 +6354,10 @@ void idPlayer::UpdateWeapon( void ) {
 		return;
 	}
 
+	if (mana <= 0){
+		return;
+	}
+
 	assert( !spectating );
 
 	// clients need to wait till the weapon and it's world model entity
@@ -7227,8 +7271,7 @@ void idPlayer::UpdateFocus( void ) {
 
 				ui->SetStateString( "player_health", va("%i", health ) );
 				ui->SetStateString( "player_armor", va( "%i%%", inventory.armor ) );
-				ui->SetStateString("player_mana", va("%i%%", mana));
-				ui->SetStateString("player_stamina", va("%i%%", stamina));
+				ui->SetStateString("player_mana", va("%i", mana));
 
 				kv = ent->spawnArgs.MatchPrefix( "gui_", NULL );
 				while ( kv ) {
@@ -11201,6 +11244,10 @@ idPlayer::Event_SetHealth
 */
 void idPlayer::Event_SetHealth( float newHealth ) {
 	health = idMath::ClampInt( 1 , inventory.maxHealth, newHealth );
+}
+
+void idPlayer::Event_SetMana(float newMana){
+	mana = idMath::ClampInt(0, inventory.maxMana, newMana);
 }
 
 /*

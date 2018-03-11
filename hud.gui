@@ -5,43 +5,42 @@ windowDef Desktop
 	nocursor	1
 	menugui	0
 	
-//-----------------------
-//Health, Mana, and Stamina bars
-//-----------------------
-	windowDef healthBar
+	HealthBar 1
+	HealthText 1
+	ManaBar 1
+	ManaText 1
+	
+	windowDef HealthBar
 	{
-		rect 10,100,("gui::player_health"),20
-		visible 1
+		rect 10,400,("gui::player_health"),20
 		backcolor 1,0,0,1
+		visible 1
+		shear 0,0.2
+	}
+	
+	windowDef HealthText
+	{
+		rect 10,400,100,20
+		visible 1
 		text "Health"
-		textscale 0.3
-		nocursor 1
-		shear 0,0.25
+		textScale 0.3
 	}
 	
-	windowDef manaBar
+	windowDef ManaBar
 	{
-		rect 10,125,("gui::player_mana"),20
-		visible 1
+		rect 10,422.5,("gui::player_mana"),20
 		backcolor 0,0,1,1
-		text "Mana"
-		textscale 0.3
-		nocursor 1
-		shear 0,0.25
-	}
-	
-	windowDef staminaBar
-	{
-		rect 10,150,("gui::player_stamina"),20
 		visible 1
-		backcolor 0,1,0,1
-		text "Stamina"
-		textscale 0.3
-		nocursor 1
-		shear 0,0.25
+		shear 0,0.2
 	}
-
 	
+	windowDef ManaText
+	{
+		rect 10,422.5,100,20
+		visible 1
+		text "Mana"
+		textScale 0.3
+	}
 	
 //-----------------------		
 // floats and defines
@@ -75,8 +74,6 @@ windowDef Desktop
 	
 	onInit {
 		namedEvent "updateHealth";
-		namedEvent "updateHP";
-		namedEvent "updateMana";
 		namedEvent "updateArmor";
 		namedEvent "updateAmmo";		
 		namedEvent "clipCheck";
@@ -84,13 +81,6 @@ windowDef Desktop
 		namedEvent "hideBrackets";
 		namedEvent "weaponChange";
 		namedEvent "radioChatterDown";
-	}
-	
-	onNamedEvent updateMana{
-		if("gui::mp" == 0)
-		{
-			set "manaBar::rect" "10,125,gui::player_mana + 100,20"
-		}
 	}
 	
 	onNamedEvent hideHud {
@@ -481,30 +471,6 @@ windowDef Desktop
 		stoptransitions "missile_text";	
 		set "missile_text::forecolor" "1,.1,.1,.7" ;
 	}
-	
-	onNamedEvent showSpeed {
-		set	"speed::visible" "1" ;
-	}
-
-	onNamedEvent hideSpeed {
-		set "speed::visible" "0" ;
-	}
-
-//-----------------------		
-// MP speed meter
-//-----------------------
-
-	windowDef speed
-	{
-		rect	550,70,80,20
-		text	"gui::player_speed"
-		font	"fonts/lowpixel"
-		textalign	2
-		textscale	0.25
-		textstyle	1
-		forecolor	1,1,1,0.6
-	}		
-	
 		
 //-----------------------
 //  Comment controller - dev only
@@ -660,178 +626,13 @@ windowDef Desktop
 // ammo
 //-----------------------		
 
-	windowDef p_ammo
-	{
-		rect	0,0,640,480
-		visible	("gui::mp" == 0 )
-		windowDef ammo_backbar
-		{
-			rect	13,420,125,59
-			visible	1
-			background	"gfx/guis/hud/backbar"
-			matcolor	0,0,0,0.5
-			shear	0,-.22
-		}
-		windowDef ammo_valbar
-		{
-			rect	13,420,125,59
-			visible	1
-			background	"gfx/guis/hud/valbar"
-			matcolor	0.701,0.815,0.431,0.2
-			shear	0,-.22
-		}
-		
-		windowDef p_ammo_val
-		{
-			rect	133 - ( "gui::player_ammopct" * 115 ),420,115,59
-			visible	1
-			shear	0,-.22
-			windowDef ammo_val
-			{
-				rect	-120 + ( "gui::player_ammopct" * 115 ),0,125,59
-				visible	1
-				background	"gfx/guis/hud/valbar"
-				matcolor	0.701,0.815,0.431,0.35
-				shear	0,-.22
-			}
-		}
-		windowDef current_gun
-		{
-			rect	11,435,106,26
-			visible	"desktop::showGunInfo" != 0
-			background	"gui::weapicon"
-			matcolor	0.780,0.741,0.470,0.4
-		}		
-		windowDef ammo_amount
-		{
-			rect	44,429,49,26
-			visible	1
-			forecolor	0.866,0.921,0.764,1
-			text	"gui::player_ammo"
-			textscale	0.5
-			font	"fonts/chain"
-			shear	0,-.22
-			textalign	2
-		}
-		windowDef total_ammo
-		{
-			rect	91,432,40,18
-			visible	1
-			forecolor	0.866,0.921,0.764,1
-			text	"gui::player_totalammo"
-			textscale	0.32
-			font	"fonts/chain"
-			shear	0,-.22
-			textalign	2
-		}
-		windowDef ammo_amount_nc
-		{
-			rect	82,429,49,26
-			visible	0
-			forecolor	0.866,0.921,0.764,1
-			text	"gui::player_totalammo"
-			textscale	0.5
-			font	"fonts/chain"
-			shear	0,-.22
-			textalign	2
-		}	
-		windowDef icon_ammoweapon
-		{
-			rect	113,458,16,16
-			visible	1
-			background	"gui::ammoicon"
-			matcolor	0.658,0.639,0.376,0.6
-		}
-	}
+	
 	
 //-----------------------		
 // health
 //-----------------------		
 	
-	windowDef p_health
-	{
-		rect	0,0,640,480
-		visible	("gui::mp" == 0 )
-		windowDef health_backbar
-		{
-			rect	190,420,125,59
-			visible	1
-			background	"gfx/guis/hud/backbar"
-			matcolor	0,0,0,0.5
-			shear	0,-.22
-		}
-		windowDef health_valbar
-		{
-			rect	190,420,125,59
-			visible	1
-			background	"gfx/guis/hud/valbar"
-			matcolor	0.701,0.815,0.431,0.2
-			shear	0,-.22
-		}
-		windowDef health_ekg
-		{
-			rect	190,420,125,59
-			visible	1
-			background	"gfx/guis/hud/ekg"
-			matcolor	0.0862,0.105,0.0549,1
-			shear	0,-.22
-		}
-		windowDef p_health_val
-		{
-			rect	310 - ( "gui::player_healthpct" * 115 ),420,115,59
-			visible	1
-			shear	0,-.22
-			windowDef health_val
-			{
-				rect	-120 + ( "gui::player_healthpct" * 115 ),0,125,59
-				visible	1
-				background	"gfx/guis/hud/valbar"
-				matcolor	0.701,0.815,0.431,0.35
-				shear	0,-.22
-			}
-		}
-		windowDef d_health_amount
-		{
-			rect	254,427,58,31
-			visible	0
-		}		
-		windowDef health_amount
-		{
-			rect	256,429,52,26
-			visible	1
-			forecolor	0.866,0.921,0.764,1
-			text	"gui::player_health"
-			textscale	0.5
-			font	"fonts/chain"
-			shear	0,-.22
-			textalign	2
-			notime	1
-			
-			onTime 0
-			{
-				transition "forecolor" "$desktop::white" "$desktop::typecolor" "250" ;
-				transition "rect" "$d_health_amount::rect" "$health_amount::rect" "250" ;
-				transition "textscale" "0.6" "0.5" "250" ;
-				
-				transition "icon_health::matcolor" "$desktop::white" "$desktop::healthicon" "250" ;
-			}
-		}
-		windowDef icon_health
-		{
-			rect	288,458,16,16
-			visible	1
-			background	"gfx/guis/hud/icons/item_health"
-			matcolor	0.658,0.639,0.376,0.6
-		}
-		windowDef health_backbar_add
-		{
-			rect	190,420,125,59
-			visible	0
-			background	"gfx/guis/hud/backbar_add"
-			matcolor	1*guitable_10_5[time*0.002],0,0,1
-			shear	0,-.22
-		}
-	}
+	
 	
 //-----------------------		
 // armor
