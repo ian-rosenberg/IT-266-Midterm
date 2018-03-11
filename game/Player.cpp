@@ -62,7 +62,7 @@ const float	PLAYER_ITEM_DROP_SPEED	= 100.0f;
 // how many units to raise spectator above default view height so it's in the head of someone
 const int SPECTATE_RAISE = 25;
 
-const int	MANA_PULSE			= 2000;
+const int	MANA_PULSE			= 1000;
 const int	HEALTH_PULSE		= 1000;			// Regen rate and heal leak rate (for health > 100)
 const int	ARMOR_PULSE			= 1000;			// armor ticking down due to being higher than maxarmor
 const int	AMMO_REGEN_PULSE	= 1000;			// ammo regen in Arena CTF
@@ -1524,7 +1524,6 @@ void idPlayer::Init( void ) {
 	inventory.SetOwner(this);
 
 	health = inventory.maxHealth;
-	mana = inventory.maxMana;
 	
 	noclip					= false;
 	godmode					= false;
@@ -1838,7 +1837,7 @@ void idPlayer::Spawn( void ) {
 	idBounds	bounds;
 
 	health = inventory.maxHealth;
-	mana = inventory.maxMana;
+	mana = 0;
 
 
 	if ( entityNumber >= MAX_CLIENTS ) {
@@ -3033,8 +3032,7 @@ void idPlayer::RestorePersistantInfo( void ) {
 	spawnArgs.Copy( gameLocal.persistentPlayerInfo[entityNumber] );
 
 	inventory.RestoreInventory( this, spawnArgs );
- 	health = spawnArgs.GetInt( "health", "100" );
-	mana = spawnArgs.GetInt("mana", "100");
+	health = spawnArgs.GetInt("health", "100");
  	if ( !gameLocal.isClient ) {
  		idealWeapon = spawnArgs.GetInt( "current_weapon", "0" );
  	}
@@ -4152,7 +4150,6 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
  			}
 		}
 		nextHealthPulse = gameLocal.time + HEALTH_PULSE;
-		nextManaPulse = gameLocal.time + MANA_PULSE;
 	} else if ( !idStr::Icmp( statname, "armor" ) ) {
 		if ( inventory.armor >= boundaryArmor ) {
 			return false;
@@ -4932,9 +4929,10 @@ void idPlayer::UpdatePowerUps( void ) {
 		}
 	}
 
-	if (gameLocal.time > nextManaPulse){
+	if (gameLocal.time >= nextManaPulse){
 		if (mana < inventory.maxMana){
-			mana += (inventory.maxMana / 10);
+			mana += 1;
+			nextManaPulse = 0;
 		}
 		else{
 			mana = inventory.maxMana;

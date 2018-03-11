@@ -648,7 +648,6 @@ void idEntity::Spawn( void ) {
 	}
 
 	health = spawnArgs.GetInt( "health" );
-	mana = 100; // base maxMana
 
 	InitDefaultPhysics( origin, axis );
 
