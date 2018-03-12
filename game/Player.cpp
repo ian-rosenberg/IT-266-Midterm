@@ -51,6 +51,9 @@ const int LADDER_RUNG_DISTANCE = 32;
 // amount of health per dose from the health station
 const int HEALTH_PER_DOSE = 10;
 
+//max health/mana possible
+const int MAX_STAT = 300;
+
 // time before a weapon dropped to the floor disappears
 const int WEAPON_DROP_TIME = 20 * 1000;
 
@@ -3410,13 +3413,13 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 	
 	assert ( _hud );
 
-	if (healthToAdd){
+	if (healthToAdd && inventory.maxHealth < MAX_STAT){
 		inventory.maxHealth += 5;
 		health += 5;
 		healthToAdd = false;
 	}
 
-	if (manaToAdd){
+	if (manaToAdd && inventory.maxMana < MAX_STAT){
 		inventory.maxMana += 10;
 		mana += 10;
 		manaToAdd = false;
