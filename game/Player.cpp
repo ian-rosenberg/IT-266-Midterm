@@ -62,7 +62,7 @@ const float	PLAYER_ITEM_DROP_SPEED	= 100.0f;
 // how many units to raise spectator above default view height so it's in the head of someone
 const int SPECTATE_RAISE = 25;
 
-const int	MANA_PULSE			= 1000;
+const int	MANA_PULSE			= 10000;
 const int	HEALTH_PULSE		= 1000;			// Regen rate and heal leak rate (for health > 100)
 const int	ARMOR_PULSE			= 1000;			// armor ticking down due to being higher than maxarmor
 const int	AMMO_REGEN_PULSE	= 1000;			// ammo regen in Arena CTF
@@ -241,19 +241,6 @@ void idInventory::Clear( void ) {
 }
 
 
-void idPlayer::AddHealth()
-{
-	inventory.maxHealth += 5;
-	health += 5;
-
-	return;
-}
-
-void idPlayer::AddMana()
-{
-	inventory.maxMana += 10;
-	mana += 10;
-}
 
 /*
 ==============
@@ -1048,13 +1035,8 @@ idInventory::HasAmmo
 ===============
 */
 int idInventory::HasAmmo( int index, int amount ) {
-	if ( ( index == 0 ) || !amount ) {
+	if ((index == 0) || !amount) {
 		// always allow weapons that don't use ammo to fire
-		return -1;
-	}
-
-	// check if we have infinite ammo
-	if ( ammo[ index ] < 0 ) {
 		return -1;
 	}
 
@@ -1080,13 +1062,13 @@ idInventory::UseAmmo
 ===============
 */
 bool idInventory::UseAmmo( int index, int amount ) {
-	if ( !HasAmmo( index, amount ) ) {
+	if ( !HasAmmo( index, amount * 20 ) ) {
 		return false;
 	}
 
 	// take an ammo away if not infinite
-	if (owner->mana >= 0 ) {
-		owner->mana -= amount;
+	if (owner->mana >= amount ) {
+		owner->mana -= amount * 20;//will change per weapon
  		ammoPredictTime = gameLocal.time; // mp client: we predict this. mark time so we're not confused by snapshots
 	}
 
@@ -3428,6 +3410,18 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 	
 	assert ( _hud );
 
+	if (healthToAdd){
+		inventory.maxHealth += 5;
+		health += 5;
+		healthToAdd = false;
+	}
+
+	if (manaToAdd){
+		inventory.maxMana += 10;
+		mana += 10;
+		manaToAdd = false;
+	}
+
 	temp = _hud->State().GetInt ( "player_health", "-1" );
 	if ( temp != health ) {		
 		_hud->SetStateInt   ( "player_healthDelta", temp == -1 ? 0 : (temp - health) );
@@ -3435,10 +3429,7 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 		_hud->SetStateFloat	( "player_healthpct", idMath::ClampFloat ( 0.0f, 1.0f, (float)health / (float)inventory.maxHealth ) );
 		_hud->HandleNamedEvent ( "updateHealth" );
 	}
-
-	gameLocal.Printf('\n' + "Mana amt: " + mana + '\n');
 	
-
 	temp = _hud->State().GetInt("player_mana", "-1");
 	if (temp != mana || !temp){
 		_hud->SetStateInt("player_mana", mana);
@@ -4929,7 +4920,7 @@ void idPlayer::UpdatePowerUps( void ) {
 		}
 	}
 
-	if (gameLocal.time >= nextManaPulse){
+	if (gameLocal.time >= nextManaPulse * 8){//add levelModifier
 		if (mana < inventory.maxMana){
 			mana += 1;
 			nextManaPulse = 0;

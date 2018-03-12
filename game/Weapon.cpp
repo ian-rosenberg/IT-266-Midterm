@@ -684,7 +684,7 @@ void rvWeapon::Spawn ( void ) {
 
 	viewModel->PostGUIEvent( "weapon_init" );
 	viewModel->PostGUIEvent( "weapon_ammo" );
-	if ( ammoClip == 0 && AmmoAvailable() == 0 ) {
+	if (owner->mana <= 0 ) {
 		viewModel->PostGUIEvent( "weapon_noammo" );
 	}
 

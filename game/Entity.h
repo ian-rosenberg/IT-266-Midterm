@@ -135,7 +135,9 @@ public:
 	idList< idEntityPtr<idEntity> >	targets;		// when this entity is activated these entities entity are activated
 
 	int						health;					// FIXME: do all objects really need health?
+	bool					healthToAdd;
 	int						mana;
+	bool					manaToAdd;
 
 // RAVEN BEGIN
 // ddynerman: optional pre-prediction
@@ -191,6 +193,9 @@ public:
 
 							idEntity();
 							~idEntity();
+
+	virtual void			AddHealth();
+	virtual void			AddMana();
 
 	void					Spawn( void );
 

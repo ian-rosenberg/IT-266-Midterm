@@ -548,6 +548,9 @@ void idEntity::Spawn( void ) {
 	const char			*classname;
 	const char			*scriptObjectName;
 
+	healthToAdd = false;
+	manaToAdd = false;
+
 	gameLocal.RegisterEntity( this );
 
 // bdube: make sure there is a classname before trying to use it
@@ -4904,6 +4907,20 @@ void idEntity::Event_SetHealth( float newHealth ) {
 
 void idEntity::Event_SetMana(float newMana) {
 	mana = newMana;
+}
+
+void idEntity::AddHealth()
+{
+	healthToAdd = true;
+
+	return;
+}
+
+void idEntity::AddMana()
+{
+	manaToAdd = true;
+
+	return;
 }
 
 // RAVEN END

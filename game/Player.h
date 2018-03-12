@@ -440,9 +440,6 @@ public:
 	void					Think( void );
 
 
-	void					AddHealth();
-	void					AddMana();
-
 	// save games
 	void					Save( idSaveGame *savefile ) const;					// archives object for save game file
 	void					Restore( idRestoreGame *savefile );					// unarchives object from save game file
