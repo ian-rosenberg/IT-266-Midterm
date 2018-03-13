@@ -12,7 +12,7 @@ windowDef Desktop
 	
 	windowDef HealthBar
 	{
-		rect 10,400,("gui::player_health"),20
+		rect 20,350,("gui::player_health"),20
 		backcolor 1,0,0,1
 		visible 1
 		shear 0,0.2
@@ -20,7 +20,7 @@ windowDef Desktop
 	
 	windowDef HealthText
 	{
-		rect 10,400,100,20
+		rect 20,350,100,20
 		visible 1
 		text "Health"
 		textScale 0.3
@@ -28,7 +28,7 @@ windowDef Desktop
 	
 	windowDef ManaBar
 	{
-		rect 10,422.5,("gui::player_mana"),20
+		rect 20,372.5,("gui::player_mana"),20
 		backcolor 0,0,1,1
 		visible 1
 		shear 0,0.2
@@ -36,10 +36,38 @@ windowDef Desktop
 	
 	windowDef ManaText
 	{
-		rect 10,422.5,100,20
+		rect 20,372.5,100,20
 		visible 1
 		text "Mana"
 		textScale 0.3
+	}
+	
+	windowDef LevelText
+	{
+		rect 20, 395, 150, 30
+		text "Level One"
+		visible 0
+		textScale 0.4
+	}
+	
+	onNamedEvent "Level1"{
+		set "levelText::text" "Level One"
+	}
+	
+	onNamedEvent "Level2"{
+		set "levelText::text" "Level Two"
+	}
+	
+	onNamedEvent "Level3"{
+		set "levelText::text" "Level Three"
+	}
+	
+	onNamedEvent "Level4"{
+		set "levelText::text" "Level Four"
+	}
+	
+	onNamedEvent "Level5"{
+		set "levelText::text" "Level Five - MAX"
 	}
 	
 //-----------------------		
