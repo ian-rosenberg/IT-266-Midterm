@@ -1869,7 +1869,7 @@ void idPlayer::Spawn( void ) {
 		objectiveSystem = NULL;
 
 		if ( spawnArgs.GetString( "hud", "", temp ) ) {
-			hud = uiManager->FindGui( "hud.gui", true, false, true );
+			hud = uiManager->FindGui( "pak021/guis/hud.gui", true, false, true );
 		} else {
 			gameLocal.Warning( "idPlayer::Spawn() - No hud for player." );
 		}
